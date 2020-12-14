@@ -2,6 +2,7 @@
 const mysql = require("mysql");
 const inquirer = require("inquirer");
 const consoleTable = require("console.table");
+const logo = require("asciiart-logo");
 // connection
 const connection = mysql.createConnection({
   host: "localhost",
@@ -15,6 +16,20 @@ const connection = mysql.createConnection({
 // inquirer - department {id, name}, role {id, title, salary, department_id}, employee {id, first_name, last_name, role_id, manager_id}
 
 const menu = () => {
+  console.log(
+    logo({
+      name: "Employours",
+      font: "Speed",
+      lineCHars: 10,
+      padding: 2,
+      margin: 3,
+      borderColor: "pink",
+      logoColor: "bold-green",
+      textColor: "teal",
+    })
+      .emptyLine()
+      .render()
+  );
   inquirer
     .prompt({
       type: "list",
@@ -34,7 +49,7 @@ const menu = () => {
     .then(({ action }) => {
       switch (action) {
         case "View All Employees":
-          console.log("Hey from All Employees");
+          view();
           break;
         case "View All Employees By Department":
           console.log("Hey from all employees by dept");
@@ -60,8 +75,6 @@ const menu = () => {
     });
 };
 
-menu();
-
 // add department, add roles, add employees
 // view department, view roles, view employees, view employee by manager
 // update employee roles, update employee managers
@@ -70,16 +83,16 @@ menu();
 
 // Constructor functions
 
-function View(category) {
-  console.log(`Selecting from ${category}..`);
-  connection.query(`SELECT * FROM ${category}`, (err, data) => {
+const view = () => {
+  console.log("Selecting from Employee");
+  connection.query("SELECT * FROM employee", (err, data) => {
     if (err) throw err;
-    console.log(data);
+    console.table(data);
     connection.end;
   });
-}
+};
 
-const employees = new View(EMPLOYEE);
+menu();
 
 connection.connect((err) => {
   if (err) throw err;

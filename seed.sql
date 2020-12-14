@@ -5,7 +5,7 @@ CREATE DATABASE employee_DB;
 USE employee_DB;
 
 CREATE TABLE employee (
-  employeeId INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(30),
     last_name VARCHAR(30),
     rolesId INTEGER,
