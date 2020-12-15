@@ -13,12 +13,12 @@ CREATE TABLE employee (
     );
 
 CREATE TABLE department (
-    id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    dId INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     dept_name VARCHAR(30)
 );
 
 CREATE TABLE roles (
-    id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    rId INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(30),
     salary DECIMAL(6,0),
     departId INTEGER
@@ -26,14 +26,25 @@ CREATE TABLE roles (
 
 INSERT INTO department (dept_name) values ("Management");
 INSERT INTO department (dept_name) values ("Fieldwork");
-INSERT INTO department (dept_name) values ("Corporate");
+INSERT INTO department (dept_name) values ("Client Relations");
 
 INSERT INTO roles (title, salary, departId) values ("Job Captain", 100000, 1);
 INSERT INTO roles (title, salary, departId) values ("Operator", 30000, 2);
-INSERT INTO roles (title, salary, departId) values ("Field_Coordinator", 500000, 3);
+INSERT INTO roles (title, salary, departId) values ("Customer Service", 85000, 3);
 
-INSERT INTO employee (first_name, last_name, rolesId, managerId) values ("V", "V", 3, 1);
+INSERT INTO employee (first_name, last_name, rolesId)     values ("Evelyn", "Parker", 3);
 INSERT INTO employee (first_name, last_name, rolesId) values ("Dexter", "DeShawn", 1);
-INSERT INTO employee (first_name, last_name, rolesId, managerId) values ("Jackie", "Wells", 3, 1);
+INSERT INTO employee (first_name, last_name, rolesId, managerId) values ("Jackie", "Wells", 2, 1);
 
 SELECT * FROM employee;
+SELECT * FROM roles;
+SELECT * FROM department;
+
+SELECT id, first_name, last_name, title, salary, dept_name, CONCAT(first_name, " ", last_name) AS "Manager" FROM employee 
+INNER JOIN roles ON employee.rolesId = (roles.rId)
+INNER JOIN department ON roles.departId = (department.dId);
+
+SELECT first_name, last_name FROM employee WHERE rolesID = 1;
+SELECT CONCAT(first_name, " ", last_name) AS "Manager" FROM employee WHERE rolesID = 1;
+
+INSERT INTO employee SET 

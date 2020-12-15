@@ -11,25 +11,19 @@ const connection = mysql.createConnection({
   password: "honk balloon tennis",
   database: "employee_DB",
 });
+// MySQL view query variables
+const employeesByAll =
+  "SELECT id, first_name, last_name, title, salary, dept_name, CONCAT(first_name, ' ', last_name) AS 'Manager' FROM employee INNER JOIN roles ON employee.rolesId = (roles.rId) INNER JOIN department ON roles.departId = (department.dId)";
+const employeesByDept = "";
+const employeesByManager = "";
+const addJobCaptain = "";
+const addOperator = "";
+const addCuService = "";
 
 //functions
 // inquirer - department {id, name}, role {id, title, salary, department_id}, employee {id, first_name, last_name, role_id, manager_id}
 
 const menu = () => {
-  console.log(
-    logo({
-      name: "Employours",
-      font: "Speed",
-      lineCHars: 10,
-      padding: 2,
-      margin: 3,
-      borderColor: "pink",
-      logoColor: "bold-green",
-      textColor: "teal",
-    })
-      .emptyLine()
-      .render()
-  );
   inquirer
     .prompt({
       type: "list",
@@ -49,7 +43,7 @@ const menu = () => {
     .then(({ action }) => {
       switch (action) {
         case "View All Employees":
-          view();
+          new View(employeesByAll);
           break;
         case "View All Employees By Department":
           console.log("Hey from all employees by dept");
@@ -58,7 +52,7 @@ const menu = () => {
           console.log("Hey from all employees by manager");
           break;
         case "Add Employee":
-          console.log("Hey From Add employee");
+          addEmployee();
           break;
         case "Remove Employee":
           console.log("Hey from remove employee");
@@ -75,23 +69,93 @@ const menu = () => {
     });
 };
 
+function addEmployee() {
+  console.log("Adding employee...");
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "first_name",
+        message: "Please enter the first name of the employee",
+        validate: (response) =>
+          response === ""
+            ? console.log("First name cannot be left blank")
+            : true,
+      },
+      {
+        type: "input",
+        name: "last_name",
+        message: "Please enter the last name of the employee",
+        validate: (response) =>
+          response === ""
+            ? console.log("Last name cannot be left blank")
+            : true,
+      },
+      {
+        type: "list",
+        name: "role",
+        message: "Please choose a role from the following list",
+        choices: ["Job Captain", "Operator", "Customer Service"],
+      },
+    ])
+    .then(function (choice) {
+      if (choice.role === "Job Captain") {
+        console.log(choice.first_name);
+        // new Add(addJobCaptain);
+      } else if (choice.role === "Operator") {
+        console.log("Hello, Operator");
+        // new Add(addOperator);
+      } else {
+        console.log("Customer Service, how may I be of, uh... Service");
+        // new Add(addCuService);
+      }
+    });
+}
 // add department, add roles, add employees
 // view department, view roles, view employees, view employee by manager
 // update employee roles, update employee managers
 // Delete departments, roles, and employees
 // view (sort) total budget by dept, combine salaries
 
-// Constructor functions
-
-const view = () => {
-  console.log("Selecting from Employee");
-  connection.query("SELECT * FROM employee", (err, data) => {
+// Constructor functions and other query functions
+function View(category) {
+  this.category = category;
+  // console.log(`Selecting from ${category}`);
+  const query = connection.query(category, (err, data) => {
     if (err) throw err;
     console.table(data);
-    connection.end;
+    menu();
   });
-};
+}
 
+function Add(role) {
+  this.role = role;
+  console.log(`Selecting from ${role}`);
+  const query = connection.query(role, (err, data) => {
+    if (err) throw err;
+    console.table(data);
+    menu();
+  });
+}
+
+// useless but fun splash page
+const splashTitle = () =>
+  console.log(
+    logo({
+      name: "Employours",
+      font: "Speed",
+      lineCHars: 10,
+      padding: 2,
+      margin: 3,
+      borderColor: "bold-cyan",
+      logoColor: "bold-yellow",
+      textColor: "teal",
+    })
+      .emptyLine()
+      .render()
+  );
+
+splashTitle();
 menu();
 
 connection.connect((err) => {
