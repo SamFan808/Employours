@@ -47,4 +47,3 @@ INNER JOIN department ON roles.departId = (department.dId);
 SELECT first_name, last_name FROM employee WHERE rolesID = 1;
 SELECT CONCAT(first_name, " ", last_name) AS "Manager" FROM employee WHERE rolesID = 1;
 
-INSERT INTO employee SET 

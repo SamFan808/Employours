@@ -13,12 +13,25 @@ const connection = mysql.createConnection({
 });
 // MySQL view query variables
 const employeesByAll =
-  "SELECT id, first_name, last_name, title, salary, dept_name, CONCAT(first_name, ' ', last_name) AS 'Manager' FROM employee INNER JOIN roles ON employee.rolesId = (roles.rId) INNER JOIN department ON roles.departId = (department.dId)";
+  "SELECT id, first_name, last_name, title, salary, dept_name, CONCAT(first_name, ' ', last_name) AS 'Manager' FROM employee LEFT JOIN roles ON employee.rolesId = (roles.rId) LEFT JOIN department ON roles.departId = (department.dId)";
 const employeesByDept = "";
 const employeesByManager = "";
-const addJobCaptain = "";
+
+const addEmployeE = "";
+const addDept = "";
+const addRole = "";
+
 const addOperator = "";
 const addCuService = "";
+const employeesNames =
+  "SELECT id, CONCAT(first_name, + ' ' ,last_name) FROM employee";
+
+connection.connect((err) => {
+  if (err) throw err;
+  console.log(`Connected at ${connection.threadId}`);
+  splashTitle();
+  menu();
+});
 
 //functions
 // inquirer - department {id, name}, role {id, title, salary, department_id}, employee {id, first_name, last_name, role_id, manager_id}
@@ -31,19 +44,23 @@ const menu = () => {
       message: "What would you like to do?",
       choices: [
         "View All Employees",
-        "View All Employees By Department",
-        "View All Employees By Manager",
+        "View All Employees By Department", // this one isn't even in the ReadMe
+        "View All Employees By Manager", //bonus
+        "View All Departments",
+        "View All Roles",
+        "Add Department",
+        "Add Role",
         "Add Employee",
-        "Remove Employee",
+        "Remove Employee", //bonus
         "Update Employee Role",
-        "Update Employee Manager",
+        "Update Employee Manager", // bonus
         "Exit",
       ],
     })
     .then(({ action }) => {
       switch (action) {
         case "View All Employees":
-          new View(employeesByAll);
+          const empAll = new View(employeesByAll);
           break;
         case "View All Employees By Department":
           console.log("Hey from all employees by dept");
@@ -65,6 +82,7 @@ const menu = () => {
           break;
         case "Exit":
           connection.end();
+          break;
       }
     });
 };
@@ -99,9 +117,10 @@ function addEmployee() {
       },
     ])
     .then(function (choice) {
+      // const addJobCaptain = "INSERT INTO employee SET ?";
+
       if (choice.role === "Job Captain") {
-        console.log(choice.first_name);
-        // new Add(addJobCaptain);
+        new Add(addJobCaptain);
       } else if (choice.role === "Operator") {
         console.log("Hello, Operator");
         // new Add(addOperator);
@@ -111,6 +130,7 @@ function addEmployee() {
       }
     });
 }
+
 // add department, add roles, add employees
 // view department, view roles, view employees, view employee by manager
 // update employee roles, update employee managers
@@ -120,8 +140,7 @@ function addEmployee() {
 // Constructor functions and other query functions
 function View(category) {
   this.category = category;
-  // console.log(`Selecting from ${category}`);
-  const query = connection.query(category, (err, data) => {
+  connection.query(category, (err, data) => {
     if (err) throw err;
     console.table(data);
     menu();
@@ -130,12 +149,12 @@ function View(category) {
 
 function Add(role) {
   this.role = role;
-  console.log(`Selecting from ${role}`);
-  const query = connection.query(role, (err, data) => {
+  connection.query(role, (err, data) => {
     if (err) throw err;
     console.table(data);
     menu();
   });
+  console.log(query.sql);
 }
 
 // useless but fun splash page
@@ -154,11 +173,3 @@ const splashTitle = () =>
       .emptyLine()
       .render()
   );
-
-splashTitle();
-menu();
-
-connection.connect((err) => {
-  if (err) throw err;
-  console.log(`Connected at ${connection.threadId}`);
-});
