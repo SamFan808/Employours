@@ -13,19 +13,15 @@ const connection = mysql.createConnection({
 });
 // MySQL view query variables
 const employeesByAll =
-  "SELECT id, first_name, last_name, title, salary, dept_name, CONCAT(first_name, ' ', last_name) AS 'Manager' FROM employee LEFT JOIN roles ON employee.rolesId = (roles.rId) LEFT JOIN department ON roles.departId = (department.dId)";
-const employeesByDept = "";
-const employeesByManager = "";
+  "SELECT id, first_name, last_name, title, salary, dept_name,  managerId, CONCAT(first_name, ' ', last_name) AS 'Manager' FROM employee LEFT JOIN roles ON employee.rolesId = (roles.rId) LEFT JOIN department ON roles.departId = (department.dId)"; // ask Tyler about how to show managers assigned to employees
+const departmentsAll =
+  "SELECT dept_name AS 'Department', title AS 'Title', salary AS 'Salary', CONCAT(first_name, ' ' , last_name) AS 'Name' FROM department LEFT JOIN roles ON roles.departId = (department.dId) LEFT JOIN employee ON employee.rolesId = (roles.rId)";
+const rolesAll =
+  "SELECT rId, title,  salary, dept_name FROM roles LEFT JOIN department ON roles.departId = (department.dId)";
 
-const addEmployeE = "";
-const addDept = "";
-const addRole = "";
+const updateRole = "UPDATE rolesId FROM employee";
 
-const addOperator = "";
-const addCuService = "";
-const employeesNames =
-  "SELECT id, CONCAT(first_name, + ' ' ,last_name) FROM employee";
-
+// connection
 connection.connect((err) => {
   if (err) throw err;
   console.log(`Connected at ${connection.threadId}`);
@@ -34,7 +30,6 @@ connection.connect((err) => {
 });
 
 //functions
-// inquirer - department {id, name}, role {id, title, salary, department_id}, employee {id, first_name, last_name, role_id, manager_id}
 
 const menu = () => {
   inquirer
@@ -44,41 +39,37 @@ const menu = () => {
       message: "What would you like to do?",
       choices: [
         "View All Employees",
-        "View All Employees By Department", // this one isn't even in the ReadMe
-        "View All Employees By Manager", //bonus
-        "View All Departments",
         "View All Roles",
-        "Add Department",
-        "Add Role",
+        "View All Departments",
         "Add Employee",
-        "Remove Employee", //bonus
+        "Add Role",
+        "Add Department",
         "Update Employee Role",
-        "Update Employee Manager", // bonus
         "Exit",
       ],
     })
     .then(({ action }) => {
       switch (action) {
         case "View All Employees":
-          const empAll = new View(employeesByAll);
+          new View(employeesByAll);
           break;
-        case "View All Employees By Department":
-          console.log("Hey from all employees by dept");
+        case "View All Roles":
+          new View(rolesAll);
           break;
-        case "View All Employees By Manager":
-          console.log("Hey from all employees by manager");
+        case "View All Departments":
+          new View(departmentsAll);
           break;
         case "Add Employee":
           addEmployee();
           break;
-        case "Remove Employee":
-          console.log("Hey from remove employee");
+        case "Add Role":
+          addRole();
+          break;
+        case "Add Department":
+          addDepartment();
           break;
         case "Update Employee Role":
           console.log("Hey from update Employee Role");
-          break;
-        case "Update Employee Manager":
-          console.log("Hey from update employee Manager");
           break;
         case "Exit":
           connection.end();
@@ -94,48 +85,113 @@ function addEmployee() {
       {
         type: "input",
         name: "first_name",
-        message: "Please enter the first name of the employee",
-        validate: (response) =>
-          response === ""
-            ? console.log("First name cannot be left blank")
-            : true,
+        message: "Please enter the first name of the employee: ",
       },
       {
         type: "input",
         name: "last_name",
-        message: "Please enter the last name of the employee",
-        validate: (response) =>
-          response === ""
-            ? console.log("Last name cannot be left blank")
-            : true,
-      },
-      {
-        type: "list",
-        name: "role",
-        message: "Please choose a role from the following list",
-        choices: ["Job Captain", "Operator", "Customer Service"],
+        message: "Please enter the last name of the employee: ",
       },
     ])
-    .then(function (choice) {
-      // const addJobCaptain = "INSERT INTO employee SET ?";
-
-      if (choice.role === "Job Captain") {
-        new Add(addJobCaptain);
-      } else if (choice.role === "Operator") {
-        console.log("Hello, Operator");
-        // new Add(addOperator);
-      } else {
-        console.log("Customer Service, how may I be of, uh... Service");
-        // new Add(addCuService);
-      }
+    .then((answer) => {
+      const query = "INSERT INTO employee SET ?";
+      connection.query(
+        query,
+        { first_name: answer.first_name, last_name: answer.last_name },
+        (err, res) => {
+          if (err) throw err;
+          console.log("Employee added!");
+          menu();
+        }
+      );
+    })
+    .then((choice) => {
+      // ask Tyler about this one
+      const query = "SELECT title FROM roles";
+      connection.query(query, (err, res) => {
+        res.map(({ title }) => {
+          inquirer.prompt({
+            type: "list",
+            name: "role",
+            message: "Please choose a role from the following list",
+            choices: [`"${title}",`],
+          });
+        });
+      });
     });
 }
 
-// add department, add roles, add employees
-// view department, view roles, view employees, view employee by manager
-// update employee roles, update employee managers
-// Delete departments, roles, and employees
-// view (sort) total budget by dept, combine salaries
+function addDepartment() {
+  console.log("Adding department...");
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "dept_name",
+        message: "Please enter the name of a new Department: ",
+        validate: (response) =>
+          response === ""
+            ? console.log("Department name cannot be left blank")
+            : true,
+      },
+    ])
+    .then((answer) => {
+      const query = "INSERT INTO department SET ?";
+      connection.query(query, { dept_name: answer.dept_name }, (err, res) => {
+        if (err) throw err;
+        console.log("Department added!");
+        menu();
+      });
+    });
+}
+
+function addRole() {
+  console.log("Adding Role...");
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        name: "role",
+        message: "Please enter the name of new Role: ",
+        validate: (response) =>
+          response === ""
+            ? console.log("Department name cannot be left blank")
+            : true,
+      },
+      {
+        type: "input",
+        name: "salary",
+        message:
+          "Please enter the salary for the new Role without spaces or commas please: ",
+        validate: (response) => {
+          const num = response.match(/\d+$/);
+          if (num) {
+            return true;
+          } else {
+            return "Salary must be a number.";
+          }
+        },
+      },
+    ])
+    .then((answer) => {
+      connection.query(
+        "INSERT INTO roles SET title = ?, salary = ?", // salary not working, still need to incnrement ids
+        { title: answer.role, salary: answer.salary },
+        (err, res) => {
+          if (err) throw err;
+          console.log("Role added!");
+          menu();
+        }
+      );
+    });
+}
+
+const test = () => {
+  const query = "SELECT title FROM roles";
+  connection.query(query, (err, res) => {
+    res.forEach(({ title }) => console.log(title));
+  });
+};
 
 // Constructor functions and other query functions
 function View(category) {
@@ -147,14 +203,23 @@ function View(category) {
   });
 }
 
-function Add(role) {
-  this.role = role;
-  connection.query(role, (err, data) => {
+function Add(category) {
+  this.category = category;
+  connection.query(category, (err, data) => {
     if (err) throw err;
     console.table(data);
     menu();
   });
   console.log(query.sql);
+}
+
+function Update(category) {
+  this.category = category;
+  connection.query(category, (err, data) => {
+    if (err) throw err;
+    console.table(data);
+    menu();
+  });
 }
 
 // useless but fun splash page
