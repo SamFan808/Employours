@@ -19,7 +19,7 @@ const departmentsAll =
 const rolesAll =
   "SELECT rId, title,  salary, dept_name FROM roles LEFT JOIN department ON roles.departId = (department.dId)";
 
-const updateRole = "UPDATE rolesId FROM employee";
+// const updateRole = "UPDATE rolesId FROM employee";
 
 // connection
 connection.connect((err) => {
@@ -30,7 +30,6 @@ connection.connect((err) => {
 });
 
 //functions
-
 const menu = () => {
   inquirer
     .prompt({
@@ -78,7 +77,7 @@ const menu = () => {
     });
 };
 
-function addEmployee() {
+const addEmployee = () => {
   console.log("Adding employee...");
   inquirer
     .prompt([
@@ -93,35 +92,33 @@ function addEmployee() {
         message: "Please enter the last name of the employee: ",
       },
     ])
-    .then((answer) => {
-      const query = "INSERT INTO employee SET ?";
-      connection.query(
-        query,
-        { first_name: answer.first_name, last_name: answer.last_name },
-        (err, res) => {
-          if (err) throw err;
-          console.log("Employee added!");
-          menu();
-        }
-      );
-    })
+    // .then((answer) => {
+    //   const query = "INSERT INTO employee SET ?";
+    //   connection.query(
+    //     query,
+    //     { first_name: answer.first_name, last_name: answer.last_name },
+    //     (err, res) => {
+    //       if (err) throw err;
+    //       console.log("Employee added!");
+    //     }
+    //   );
+    // })
     .then((choice) => {
       // ask Tyler about this one
-      const query = "SELECT title FROM roles";
-      connection.query(query, (err, res) => {
-        res.map(({ title }) => {
-          inquirer.prompt({
+      const roles = connection.query("SELECT title FROM roles", (err, res) => {
+        inquirer.prompt([
+          {
             type: "list",
             name: "role",
             message: "Please choose a role from the following list",
-            choices: [`"${title}",`],
-          });
-        });
+            choices: res.map((res) => `${res.title}`),
+          },
+        ]);
       });
     });
-}
+};
 
-function addDepartment() {
+const addDepartment = () => {
   console.log("Adding department...");
   inquirer
     .prompt([
@@ -143,9 +140,9 @@ function addDepartment() {
         menu();
       });
     });
-}
+};
 
-function addRole() {
+const addRole = () => {
   console.log("Adding Role...");
   inquirer
     .prompt([
@@ -175,7 +172,7 @@ function addRole() {
     ])
     .then((answer) => {
       connection.query(
-        "INSERT INTO roles SET title = ?, salary = ?", // salary not working, still need to incnrement ids
+        "INSERT INTO roles SET title = ?, salary = ?", // salary not working, still need to increment ids
         { title: answer.role, salary: answer.salary },
         (err, res) => {
           if (err) throw err;
@@ -184,7 +181,18 @@ function addRole() {
         }
       );
     });
-}
+};
+const updateRole = () => {
+  console.log("Updating role...");
+  inquirer.prompt([
+    {
+      type: "list",
+      name: "name",
+      message: "Please choose an employee",
+      choices: [],
+    },
+  ]).then;
+};
 
 const test = () => {
   const query = "SELECT title FROM roles";
