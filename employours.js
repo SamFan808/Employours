@@ -13,7 +13,7 @@ const connection = mysql.createConnection({
 });
 // MySQL view query variables
 const employeesByAll =
-  "SELECT id, first_name, last_name, title, salary, dept_name,  managerId, CONCAT(first_name, ' ', last_name) AS 'Manager' FROM employee LEFT JOIN roles ON employee.rolesId = (roles.rId) LEFT JOIN department ON roles.departId = (department.dId)"; // ask Tyler about how to show managers assigned to employees
+  "SELECT e.id, e.first_name, e.last_name, title, salary, dept_name, CONCAT(m.first_name, ' ', m.last_name) AS 'Manager' FROM employee e LEFT JOIN employee m ON m.id = e.managerId LEFT JOIN roles ON e.rolesId = (roles.rId) LEFT JOIN department ON roles.departId = (department.dId) ORDER by e.id";
 const departmentsAll =
   "SELECT dept_name AS 'Department', title AS 'Title', salary AS 'Salary', CONCAT(first_name, ' ' , last_name) AS 'Name' FROM department LEFT JOIN roles ON roles.departId = (department.dId) LEFT JOIN employee ON employee.rolesId = (roles.rId)";
 const rolesAll =
