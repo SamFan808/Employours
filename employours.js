@@ -19,8 +19,6 @@ const departmentsAll =
 const rolesAll =
   "SELECT rId, title,  salary, dept_name FROM roles LEFT JOIN department ON roles.departId = (department.dId)";
 
-// const updateRole = "UPDATE rolesId FROM employee";
-
 // connection
 connection.connect((err) => {
   if (err) throw err;
@@ -92,28 +90,52 @@ const addEmployee = () => {
         message: "Please enter the last name of the employee: ",
       },
     ])
-    // .then((answer) => {
-    //   const query = "INSERT INTO employee SET ?";
-    //   connection.query(
-    //     query,
-    //     { first_name: answer.first_name, last_name: answer.last_name },
-    //     (err, res) => {
-    //       if (err) throw err;
-    //       console.log("Employee added!");
-    //     }
-    //   );
-    // })
+    .then((answer) => {
+      const query = "INSERT INTO employee SET ?";
+      connection.query(
+        query,
+        { first_name: answer.first_name, last_name: answer.last_name },
+        (err, res) => {
+          if (err) throw err;
+        }
+      );
+    })
     .then((choice) => {
-      // ask Tyler about this one
-      const roles = connection.query("SELECT title FROM roles", (err, res) => {
-        inquirer.prompt([
-          {
-            type: "list",
-            name: "role",
-            message: "Please choose a role from the following list",
-            choices: res.map((res) => `${res.title}`),
-          },
-        ]);
+      const query = "SELECT title FROM roles";
+      connection.query(query, (err, res) => {
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              name: "role",
+              message: "Please choose a role from the following list",
+              choices: res.map((res) => `${res.title}`),
+            },
+          ])
+          // .then((answer) => {
+          //   const query = "UPDATE employee SET rolesId = ? WHERE id = ?",
+          //     [];
+          //   connection.query(query, { title: answer.title }, (err, res) => {
+          //     if (err) throw err;
+          //   });
+          // })
+          .then((choice) => {
+            const query = "SELECT first_name, last_name FROM employee";
+            connection.query(query, (err, res) => {
+              inquirer.prompt([
+                {
+                  type: "list",
+                  name: "manager",
+                  message: "Who is the employers manager?",
+                  choices: res.map(
+                    (res) => `${res.first_name + " " + res.last_name}`
+                  ),
+                },
+              ]);
+              console.log("Employee added!");
+              // menu();
+            });
+          });
       });
     });
 };
@@ -172,8 +194,8 @@ const addRole = () => {
     ])
     .then((answer) => {
       connection.query(
-        "INSERT INTO roles SET title = ?, salary = ?", // salary not working, still need to increment ids
-        { title: answer.role, salary: answer.salary },
+        "INSERT INTO roles SET ?,?",
+        [{ title: answer.role }, { salary: answer.salary }],
         (err, res) => {
           if (err) throw err;
           console.log("Role added!");
@@ -182,6 +204,7 @@ const addRole = () => {
       );
     });
 };
+
 const updateRole = () => {
   console.log("Updating role...");
   inquirer.prompt([
@@ -194,34 +217,8 @@ const updateRole = () => {
   ]).then;
 };
 
-const test = () => {
-  const query = "SELECT title FROM roles";
-  connection.query(query, (err, res) => {
-    res.forEach(({ title }) => console.log(title));
-  });
-};
-
 // Constructor functions and other query functions
 function View(category) {
-  this.category = category;
-  connection.query(category, (err, data) => {
-    if (err) throw err;
-    console.table(data);
-    menu();
-  });
-}
-
-function Add(category) {
-  this.category = category;
-  connection.query(category, (err, data) => {
-    if (err) throw err;
-    console.table(data);
-    menu();
-  });
-  console.log(query.sql);
-}
-
-function Update(category) {
   this.category = category;
   connection.query(category, (err, data) => {
     if (err) throw err;
