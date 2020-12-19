@@ -59,3 +59,11 @@ SELECT dept_name AS 'Department', title AS 'Title', salary AS 'Salary', CONCAT(f
 LEFT JOIN roles ON roles.departId = (department.dId)
 LEFT JOIN employee ON employee.rolesId = (roles.rId);
 
+SELECT e.id, e.first_name, e.last_name, title, salary, dept_name, CONCAT(m.first_name, ' ', m.last_name)
+AS "Manager" FROM employee e
+LEFT JOIN employee m ON m.id = e.managerId
+LEFT JOIN roles ON e.rolesId = (roles.rId)
+LEFT JOIN department ON roles.departId = (department.dId)
+ORDER by e.id;
+
+SELECT e.id, e.first_name, e.last_name, title, salary, e.rolesId, e.managerId, CONCAT(m.first_name, ' ', m.last_name) AS 'manager' FROM employee e LEFT JOIN employee m ON m.id = e.managerId LEFT JOIN roles ON e.rolesId = (roles.rId) LEFT JOIN department ON roles.departId = (department.dId);
