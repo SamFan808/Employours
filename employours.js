@@ -123,7 +123,7 @@ const addEmployee = () => {
             },
           ])
           .then(({ first_name, last_name, rolesId, managerId }) => {
-            managerId === "None" ? (managerId = 0) : managerId;
+            managerId === "None" ? (managerId = null) : managerId;
             connection.query(
               "INSERT INTO employee SET ?",
               {
