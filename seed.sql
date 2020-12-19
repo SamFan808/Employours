@@ -4,14 +4,6 @@ CREATE DATABASE employee_DB;
 
 USE employee_DB;
 
-CREATE TABLE employee (
-    id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    first_name VARCHAR(30),
-    last_name VARCHAR(30),
-    rolesId INTEGER,
-    managerId INTEGER
-    );
-
 CREATE TABLE department (
     dId INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     dept_name VARCHAR(30)
@@ -21,9 +13,20 @@ CREATE TABLE roles (
     rId INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(30),
     salary DECIMAL(6,0),
-    departId INTEGER
+    departId INTEGER,
+    FOREIGN KEY(departId) REFERENCES department(dId)
 );
 
+CREATE TABLE employee (
+    id INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    first_name VARCHAR(30),
+    last_name VARCHAR(30),
+    rolesId INTEGER ,
+    managerId INTEGER,
+	FOREIGN KEY (rolesId) REFERENCES roles(rId),
+    FOREIGN KEY (managerId) REFERENCES employee(id)
+    );
+    
 INSERT INTO department (dept_name) values ("Management");
 INSERT INTO department (dept_name) values ("Fieldwork");
 INSERT INTO department (dept_name) values ("Client Relations");

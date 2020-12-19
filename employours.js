@@ -79,54 +79,69 @@ const menu = () => {
 
 const addEmployee = () => {
   console.log("Adding employee...");
-  connection.query(employeesEverything, (err, res) => {
-    if (err) throw err;
-    let managerList = res.map((res) => `${res.managerId}`);
-    let rolesList = res.map((res) => `${res.rolesId}`);
-    inquirer
-      .prompt([
-        {
-          type: "input",
-          name: "first_name",
-          message: "Please enter the first name of the employee: ",
-        },
-        {
-          type: "input",
-          name: "last_name",
-          message: "Please enter the last name of the employee: ",
-        },
-        {
-          type: "list",
-          name: "rolesId",
-          message: "Please choose a role from the following list",
-          choices: rolesList,
-        },
-        {
-          type: "list",
-          name: "managerId",
-          message: "Who is the employers manager?",
-          choices: [...managerList, "None"],
-        },
-      ])
-      .then(({ first_name, last_name, rolesId, managerId }) => {
-        managerId === "None" ? (managerId = 0) : managerId;
-        const query = "INSERT INTO employee SET ?";
-        connection.query(
-          query,
-          {
-            first_name,
-            last_name,
-            rolesId,
-            managerId,
-          },
-          (err) => {
-            if (err) throw err;
-            console.log("Employee added!");
-            menu();
-          }
-        );
+  connection.query(
+    "SELECT id, first_name, last_name FROM employee",
+    (err, res) => {
+      if (err) throw err;
+      let management = res.map((managers) => {
+        return {
+          name: managers.first_name + " " + managers.last_name,
+          value: managers.id,
+        };
       });
-  });
+      connection.query("SELECT rId, title FROM roles", (err, res) => {
+        if (err) throw err;
+        let titles = res.map((roleTitle) => {
+          return {
+            name: roleTitle.title,
+            value: roleTitle.rId,
+          };
+        });
+        inquirer
+          .prompt([
+            {
+              type: "input",
+              name: "first_name",
+              message: "Please enter the first name of the employee: ",
+            },
+            {
+              type: "input",
+              name: "last_name",
+              message: "Please enter the last name of the employee: ",
+            },
+            {
+              type: "list",
+              name: "rolesId",
+              message: "Please choose a role from the following list",
+              choices: [...titles],
+            },
+            {
+              type: "list",
+              name: "managerId",
+              message: "Who is the employers manager?",
+              choices: [...management, "None"],
+            },
+          ])
+          .then(({ first_name, last_name, rolesId, managerId }) => {
+            managerId === "None" ? (managerId = 0) : managerId;
+            connection.query(
+              "INSERT INTO employee SET ?",
+              {
+                first_name,
+                last_name,
+                rolesId,
+                managerId,
+              },
+              (err) => {
+                if (err) throw err;
+                console.log("Employee added!");
+                menu();
+              }
+            );
+          });
+      });
+    }
+  );
 };
 
 const addDepartment = () => {
@@ -155,74 +170,121 @@ const addDepartment = () => {
 
 const addRole = () => {
   console.log("Adding Role...");
-  inquirer
-    .prompt([
-      {
-        type: "input",
-        name: "role",
-        message: "Please enter the name of new Role: ",
-        validate: (response) =>
-          response === ""
-            ? console.log("Department name cannot be left blank")
-            : true,
-      },
-      {
-        type: "input",
-        name: "salary",
-        message:
-          "Please enter the salary for the new Role without spaces or commas please: ",
-        validate: (response) => {
-          const num = response.match(/\d+$/);
-          if (num) {
-            return true;
-          } else {
-            return "Salary must be a number.";
-          }
-        },
-      },
-    ])
-    .then((answer) => {
-      const query = "INSERT INTO roles SET ?,?";
-      connection.query(
-        query,
-        [{ title: answer.role }, { salary: answer.salary }],
-        (err, res) => {
-          if (err) throw err;
-          console.log("Role added!");
-          menu();
-        }
-      );
-    });
-};
-
-const updateRole = () => {
-  console.log("Updating role...");
-  connection.query(employeesEverything, (err, res) => {
+  connection.query("SELECT * FROM department", (err, res) => {
     if (err) throw err;
-    let namesList = res.map((res) => `${res.first_name + " " + res.last_name}`);
-    let rolesList = res.map((res) => `${res.title}`);
+    let dept = res.map((roleDept) => {
+      return {
+        name: roleDept.dept_name,
+        value: roleDept.dId,
+      };
+    });
     inquirer
       .prompt([
         {
-          type: "list",
-          name: "name",
-          message: "Please choose an employee",
-          choices: namesList,
+          type: "input",
+          name: "title",
+          message: "Please enter the name of new Role: ",
+          validate: (response) =>
+            response === ""
+              ? console.log("Department name cannot be left blank")
+              : true,
+        },
+        {
+          type: "input",
+          name: "salary",
+          message:
+            "Please enter the salary for the new Role without spaces or commas please: ",
+          validate: (response) => {
+            const num = response.match(/\d+$/);
+            if (num) {
+              return true;
+            } else {
+              return "Salary must be a number.";
+            }
+          },
         },
         {
           type: "list",
-          name: "role",
-          message: "Please choose a new role",
-          choices: rolesList,
+          name: "departId",
+          message: "Please select a department for this role",
+          choices: [...dept],
         },
       ])
-      .then(function () {
-        console.log("testing from updateRole");
-        menu();
+      .then(({ title, salary, departId }) => {
+        connection.query(
+          "INSERT INTO roles SET ?",
+          {
+            title,
+            salary,
+            departId,
+          },
+          (err) => {
+            if (err) throw err;
+            console.log("Role added!");
+            menu();
+          }
+        );
       });
   });
 };
 
+const updateRole = () => {
+  console.log("Updating role...");
+  connection.query(
+    "SELECT id, first_name, last_name FROM employee",
+    (err, res) => {
+      if (err) throw err;
+      let employees = res.map((empList) => {
+        return {
+          name: empList.first_name + " " + empList.last_name,
+          value: empList.id,
+        };
+      });
+      connection.query("SELECT rId, title FROM roles", (err, res) => {
+        if (err) throw err;
+        let titles = res.map((roleTitle) => {
+          return {
+            name: roleTitle.title,
+            value: roleTitle.rId,
+          };
+        });
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              name: "id",
+              message: "Please choose an employee",
+              choices: [...employees],
+            },
+            {
+              type: "list",
+              name: "rolesId",
+              message: "Please choose a new role",
+              choices: [...titles],
+            },
+          ])
+          .then(({ rolesId, id }) => {
+            connection.query(
+              "UPDATE employee SET ? WHERE ?",
+              [
+                {
+                  rolesId,
+                },
+                {
+                  id: id,
+                },
+              ],
+              (err) => {
+                if (err) throw err;
+                console.log("Employee role updated!");
+                menu();
+              }
+            );
+          });
+      });
+    }
+  );
+};
 // Constructor functions and other query functions
 function View(category) {
   this.category = category;
