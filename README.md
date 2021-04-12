@@ -6,7 +6,7 @@
 
 ## Description
 
-HW 12 - MySQL Employee Tracker
+MySQL Employee Tracker
 
 ## Table of Contents
 
