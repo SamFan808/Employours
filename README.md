@@ -22,7 +22,7 @@ MySQL Employee Tracker
 
 ## Installation
 
-`To run the application, will require installation of MySQL and NodeJS, and run npm install to installed required npm packages. Code developed using additional npm packages asciiart-logo, console.table, and inquirer. Run application in command line with node employours.js`
+`To run the application, will require installation of MySQL and NodeJS, and run npm install to installed required npm packages. Code developed using additional npm packages asciiart-logo, console.table, and inquirer.`
 
 ## Usage
 
