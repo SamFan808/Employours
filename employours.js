@@ -44,6 +44,7 @@ const menu = () => {
         "Add Role",
         "Add Department",
         "Update Employee Role",
+        "Delete Employee",
         "Exit",
       ],
     })
@@ -69,6 +70,9 @@ const menu = () => {
           break;
         case "Update Employee Role":
           updateRole();
+          break;
+        case "Delete Employee":
+          delEmployee();
           break;
         case "Exit":
           connection.end();
@@ -254,13 +258,13 @@ const updateRole = () => {
               type: "list",
               name: "id",
               message: "Please choose an employee",
-              choices: [...employees],
+              choices: [...employees, "Exit"],
             },
             {
               type: "list",
               name: "rolesId",
               message: "Please choose a new role",
-              choices: [...titles],
+              choices: [...titles, "Exit"],
             },
           ])
           .then(({ rolesId, id }) => {
@@ -285,6 +289,47 @@ const updateRole = () => {
     }
   );
 };
+
+// Delete employee
+
+const delEmployee = () => {
+  console.log("Deleting Employee...");
+  connection.query(
+    "SELECT id, first_name, last_name FROM employee",
+    (err, res) => {
+      if (err) throw err;
+      let employees = res.map((empList) => {
+        return {
+          name: empList.first_name + " " + empList.last_name,
+          value: empList.id,
+        };
+      });
+      inquirer
+        .prompt([
+          {
+            type: "list",
+            name: "id",
+            message: "Please choose an employee",
+            choices: [...employees, "Exit"],
+          },
+        ])
+        .then(({ id }) => {
+          connection.query(
+            "DELETE FROM employee WHERE ?",
+            {
+              id: id,
+            },
+            (err) => {
+              if (err) throw err;
+              console.log("Employee deleted!");
+              menu();
+            }
+          );
+        });
+    }
+  );
+};
+
 // Constructor functions and other query functions
 function View(category) {
   this.category = category;
